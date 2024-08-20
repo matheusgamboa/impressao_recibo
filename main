@@ -1,0 +1,146 @@
+// Automatic FlutterFlow imports
+import '/backend/schema/structs/index.dart';
+import '/backend/schema/enums/enums.dart';
+import '/flutter_flow/flutter_flow_theme.dart';
+import '/flutter_flow/flutter_flow_util.dart';
+import '/custom_code/actions/index.dart'; // Imports other custom actions
+import '/flutter_flow/custom_functions.dart'; // Imports custom functions
+import 'package:flutter/material.dart';
+// Begin custom action code
+// DO NOT REMOVE OR MODIFY THE CODE ABOVE!
+
+// Importa a biblioteca `pdf` para criar e manipular documentos PDF.
+import 'package:pdf/widgets.dart' as pw;
+
+// Importa definições básicas e estruturas para trabalhar com documentos PDF.
+import 'package:pdf/pdf.dart';
+
+// Importa a biblioteca `printing` para permitir a impressão direta de documentos em Flutter.
+import 'package:printing/printing.dart';
+
+// Importa a biblioteca `intl` para formatação de datas e outras formatações localizadas.
+import 'package:intl/intl.dart';
+
+// Define a função para gerar o PDF
+Future<void> gerarPdf(
+  String? nomeCliente,
+  double? valorParcela,
+  String? idParcela,
+  double? valorRecebido,
+  String? motoqueiro,
+) async {
+  final pdf = pw.Document();
+  final dateFormat = DateFormat('dd/MM/yyyy'); // Formato de data
+  final timeFormat = DateFormat('HH:mm:ss'); // Formato de hora
+
+  // Define o formato da página como 57mm de largura e 250mm de altura
+  final receiptFormat =
+      PdfPageFormat(57 * PdfPageFormat.mm, 120 * PdfPageFormat.mm);
+
+  // Adiciona uma página ao PDF com o relatório de entradas
+  pdf.addPage(
+    pw.Page(
+      pageFormat: receiptFormat,
+      build: (pw.Context context) => pw.Padding(
+        padding: pw.EdgeInsets.only(
+          top: 20, // Margem superior de 20 pixels
+          left: 16, // Padding lateral de 12 pixels
+          right: 16, // Padding lateral de 12 pixels
+          bottom: 16, // Padding inferior de 16 pixels
+        ),
+        child: pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            // Cabeçalho do relatório com data e hora atual
+            pw.Text(
+              'Recibo de pagamento',
+              style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+            ),
+            pw.SizedBox(height: 5), // Espaço entre o cabeçalho e a data
+            pw.Text(
+              'Data: ${dateFormat.format(DateTime.now())} - Hora: ${timeFormat.format(DateTime.now())}',
+              style: pw.TextStyle(fontWeight: pw.FontWeight.normal),
+            ),
+            pw.SizedBox(height: 20), // Espaço entre a data e as linhas
+            // Adiciona as linhas com informações alinhadas
+            pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+              children: [
+                pw.Text('Nome', style: pw.TextStyle(fontSize: 7)),
+                pw.Text(nomeCliente ?? 'Desconhecido',
+                    style: pw.TextStyle(fontSize: 7)),
+              ],
+            ),
+            pw.SizedBox(height: 10), // Espaço entre as linhas
+            pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+              children: [
+                pw.Text('Valor Parcela', style: pw.TextStyle(fontSize: 7)),
+                pw.Text(
+                    valorParcela != null
+                        ? valorParcela.toStringAsFixed(2)
+                        : '0.00',
+                    style: pw.TextStyle(fontSize: 7)),
+              ],
+            ),
+            pw.SizedBox(height: 5), // Espaço entre as linhas
+            pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+              children: [
+                pw.Text('Id Parcela', style: pw.TextStyle(fontSize: 7)),
+                pw.Text(idParcela ?? 'Desconhecido',
+                    style: pw.TextStyle(fontSize: 7)),
+              ],
+            ),
+            pw.SizedBox(height: 5), // Espaço entre as linhas
+            pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+              children: [
+                pw.Text('Motoqueiro', style: pw.TextStyle(fontSize: 7)),
+                pw.Text(motoqueiro ?? 'Desconhecido',
+                    style: pw.TextStyle(fontSize: 6)),
+              ],
+            ),
+            pw.SizedBox(height: 5), // Espaço entre as linhas
+            pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+              children: [
+                pw.Text('Valor Recebido', style: pw.TextStyle(fontSize: 8)),
+                pw.Text(
+                    valorRecebido != null
+                        ? valorRecebido.toStringAsFixed(2)
+                        : '0.00',
+                    style: pw.TextStyle(fontSize: 8)),
+              ],
+            ),
+            pw.Spacer(), // Espaço flexível para empurrar o rodapé para o fim da página
+            // Rodapé com traço e informações centralizadas
+            pw.Center(
+              child: pw.Column(
+                children: [
+                  pw.Text(
+                    '-------------------------',
+                    style: pw.TextStyle(fontSize: 6),
+                  ),
+                  pw.Text(
+                    'CONFIRA O VALOR DO RECIBO',
+                    style: pw.TextStyle(fontSize: 6),
+                  ),
+                  pw.Text(
+                    'QG CONSULTORIA E SERVIÇO',
+                    style: pw.TextStyle(fontSize: 6),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+
+  // Imprime o PDF
+  await Printing.layoutPdf(
+    onLayout: (PdfPageFormat format) async => pdf.save(),
+  );
+}
